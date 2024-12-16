@@ -1,0 +1,13 @@
+{
+  "dependencies": {
+    "cors": "^2.8.5",
+    "domain": "^0.0.1",
+    "epub": "^1.2.1",
+    "express": "^4.21.1",
+    "fs": "^0.0.1-security",
+    "jsdom": "^25.0.1",
+    "node-stream-zip": "^1.15.0",
+    "path": "^0.12.7",
+    "xmldom": "^0.6.0"
+  }
+}
