@@ -1,32 +1,9 @@
-/*const express = require('express');
-const cors = require('cors');
-
-const app = express();
-const PORT = 5000;
-
-// Middleware
-app.use(cors());
-app.use(express.json()); // Parse JSON bodies
-
-// Sample API endpoint
-app.get('/api/message', (req, res) => {
-  res.json({ message: 'Hello from Express server!' });
-});
-
-// Start the server
-app.listen(PORT, () => {
-  console.log(`Server is running on http://localhost:${PORT}`);
-});
-*/
-
 const express = require('express');
 const app = express();
 const cors = require('cors');
 
 //Idnetifying 
 app.use(express.static('public'));
-app.use(express.static('images'));
-app.use(express.static('uploads'));
 app.use(cors());
 app.use(express.json());
 
@@ -42,30 +19,6 @@ var absolutePath = path.resolve(".");
 
 console.log(absolutePath);
 
-//DEE To remove
-var page = {
-    type : 'text',
-    content : '',
-    chp_id : ""
-}
-//DEE To remove
-var chapter = {
-    chp_id : "",
-    pages : []
-}
-//DEE To remove
-var book = {
-    id: "",
-    title: "",
-    author: "",
-    cover: "",
-    chapters : []
-}
-
-function write_to_file(filename, content) {
-    fs.writeFileSync(filename, content);
-}
-
 function write_to_json_file(filename, content){
     console.log("Writing to json file");
     //Want to pretty print the json so it is legible
@@ -78,45 +31,13 @@ function write_to_json_file(filename, content){
     );
 }
 
-//Reader the book json file and create an array with the information
-function read_book_json(filename){
-    const data = JSON.parse(filename);
-    console.log(data.length);
-}
-
 const chunkSize = 5000;
-var pages = [];
-var myOtherStuff = {
-    listOfPages: []
-}
 
-function createPages(fullString){
-    //console.log("Trying to create pages");
-    for(let i = 0; i < fullString.length; i += chunkSize){
-        var page = [];
-        myOtherStuff.listOfPages.push(fullString.substring(i, i + chunkSize));
-    }
-    console.log(myOtherStuff.listOfPages.length);
-}
-
-//
-function createPagesTwo(paras){
-    console.log(paras);
-    const words = paras.split('</p>');
-    //console.log(words);
-
-    /*const str = "<p>Hello</p> World";
-    const test = str.split("</p>"); // Split by space'
-    
-    console.log(test); // Output: ["Hello,", "World!"]*/
-}
-
+//DEE To rename
 let numberOfPages = 0;
+//DEE To rename
+function createPages(index, fullString){
 
-function createPagesThree(index, fullString){
-
-    //currentBookInfo.listOfChapters[index].chapter_pages.push(fullString);
-    //console.log("Trying to create pages");
     for(let i = 0; i < fullString.length; i += chunkSize){
         var page = [];
         //myOtherStuff.listOfPages.push(fullString.substring(i, i + chunkSize));
@@ -124,24 +45,11 @@ function createPagesThree(index, fullString){
             fullString.substring(i, i + chunkSize));
         numberOfPages = numberOfPages + 1;
     }
-    //.log(currentBookInfo.listOfChapters[index].chapter_pages.length);
 }
-
-var htmlInfo = '';
-var chapterDiv = '';
-
-var chapters = [];
-var cover = [];
-
-//To understand
-//1) Way to identify if application/epub+zip -> done through mimetype, very first file in zip
-//2) Should figure out to open an epub file manually -> Done, just unzip it. Can reference file structure that way
-//3)
 
 //DEE Variables for tracking location
 let currentBook = 0;
-//DEE Pass in books.json so we can provide information to the user library
-//"./books/books.json"
+
 const myLibrary = require("./books/books.json");
 const { table, Console } = require('console');
 var libraryToPass = [];
@@ -158,11 +66,12 @@ function createLibrary(){
             chapters : [],
             last_page : 0
         }
+        //DEE To remove, we dont' use this
         libraryToPass.push(bookEntry);
     }
-    //console.log(libraryToPass);
 }
 
+//DEE To remove?
 function createLibrayTwo(){
     for(let q = 0; q < myLibrary.data.length; q++){
         //console.log(Library.data[q]);
@@ -173,11 +82,13 @@ function createLibrayTwo(){
             chapters : [],
             last_page : 0
         }
+        //DEE To remove, we dont' use this
         libraryVersionTwo.data.push(bookEntry);
     }
     console.log(libraryVersionTwo);
 }
 
+//DEE Do we use these anymore?
 createLibrary();
 createLibrayTwo();
 
@@ -248,7 +159,7 @@ function ExtractBook(pGivenId){
         //console.log(coverImage.attributes[0].nodeValue); 
         let coverName = coverImage.attributes[0].nodeValue;
         coverName = 'OEBPS/' + coverName;
-        //console.log(coverName);
+        console.log("This is the covername " + coverName);
     });
 
     //Now extract cover to backend
@@ -259,13 +170,6 @@ function ExtractBook(pGivenId){
     let section = {
         id : '',
         conent : ''
-    }
-
-    //We'll need the ids to determine which section we're in
-    //We'll need the chap names 
-    const tableOfChapters = {
-        listOfIds : [],
-        listOfChapNames : []
     }
     
     //Now retrieve table of contents and their ahref links
@@ -291,20 +195,16 @@ function ExtractBook(pGivenId){
             let chpTagTwo = chpTag[1].split("<");
             //console.log(chpTagTwo[0])
             
-            let removeQuotes = chpTagTwo[0].replace(/['"]/g,'');
+            let chpTagSimply = chpTagTwo[0].replace(/['"]/g,'');
 
             let idTag = anchorTags[j].split("#");
-            let noQuotes = idTag[1].replace(/['"]/g,'');
+            let idSimply = idTag[1].replace(/['"]/g,'');
 
-            tableOfChapters.listOfIds[j] = JSON.stringify(noQuotes);
-            tableOfChapters.listOfChapNames[j] = removeQuotes;
-
-            chapter.chapter_id = noQuotes;
-            chapter.chapter_name = removeQuotes;
+            chapter.chapter_id = idSimply;
+            chapter.chapter_name = chpTagSimply;
 
             currentBookInfo.listOfChapters.push(chapter);
         }  
-        
         //console.log(tableOfChapters.listOfChapNames);
     });
 
@@ -322,26 +222,18 @@ function ExtractBook(pGivenId){
                 const data = tempZip.entryDataSync(entry);
                 const currentFile = new DOMParser().parseFromString(data.toString(), "application/xhtml+xml");
                 
-                //console.log(listOfIds.toString());
-                //console.log(currentBook.listOfChapters[0].chapter_id);
-                let nextChapter = currentBookInfo.listOfChapters[i];
-                let currChap_id = currentBookInfo.listOfChapters[i].chapter_id;
-
                 for(let j = 0; j < currentBookInfo.listOfChapters.length; j++){
                     let currChapterId = currentBookInfo.listOfChapters[j].chapter_id;
                     //DEE Big issue, cannot continutally search like this, will add a lot of time
                     let recoveredInfo = currentFile.getElementById(
                         currChapterId.toString());
-                    //console.log(recoveredInfo);
                     if(recoveredInfo !== null){
                         //console.log("Found id for " + currentBookInfo.listOfChapters[j].chapter_id);
                         let page = {
                             type : 'paragraph',
                             content : recoveredInfo.toString(),
                         }
-                        //console.log(recoveredInfo.toString());
-                        //createPages(recoveredInfo.toString());
-                        createPagesThree(j, recoveredInfo.toString());
+                        createPages(j, recoveredInfo.toString());
                         //currentBookInfo.listOfChapters[j].chapter_pages.push(page);
                     }
                 }
@@ -376,22 +268,12 @@ function locatePage(pPage){
         if(currPage === pPage){
             break;
         }
-        /*for(let currChapIndex = 0; currChapIndex < 
-            currentBookInfo.listOfChapters[currChap].chapter_pages.length - 1; currChapIndex++){
-                console.log("Current page is " + currPage);
-                if(currPage === pPage){
-                    console.log("Found page at " + currPage);
-                }
-                currPage++;
-                
-        }*/
     }
     console.log("The total number of pages is " + currPage);
 }
 
 //Automatically extracts the book
 ExtractBook(0);
-
 
 app.get('/', function(req, res){
     console.log("Hello world");
@@ -414,25 +296,33 @@ app.post('/books/newbook', (req,res) => {
 
 app.get('/books/lastpage', (req,res) => {
   
-    let response = "";
+    let response = {
+        title : '',
+        content: ''
+    };
     res.setHeader("Content-Type", "text/html");
     let lastChapter = currentBookInfo.lastChapterIndex;
     let lastPage = currentBookInfo.lastPage;
     console.log("Last Page: This is the last page saved " + lastPage);
+
+    //DEE There is a much better way to do it, store the title from 
+    //the library into currentbookinfo
+    response.title = myLibrary.data[currentBookInfo.book_id].name;
+
     if(currentBookInfo.listOfChapters.length > 0){
         if(typeof lastChapter !== "undefined" && typeof lastPage !== "undefined"){
             console.log("Can recover the values when loading in new book");
-            response = currentBookInfo.listOfChapters[lastChapter].chapter_pages[lastPage];
+            response.content = currentBookInfo.listOfChapters[lastChapter].chapter_pages[lastPage];
         }else{
             console.log("Could not recover values when loading in new book with chapter index of "
                 + currentBookInfo.lastChapterIndex + " and page of " + lastPage);
             currentBookInfo.lastChapterIndex = 0;
             currentBookInfo.lastPage = 0;
-            response = currentBookInfo.listOfChapters[0].chapter_pages[0];
+            response.content = currentBookInfo.listOfChapters[0].chapter_pages[0];
         }
     }else{
         console.log("number of chapters is about zero")
-        response = "";
+        response.content = "";
     }
     
     console.log("The current page we're at is" + lastPage);
@@ -440,11 +330,9 @@ app.get('/books/lastpage', (req,res) => {
 });
 
 app.get('/books/library', (req, res) => {
-    console.log("Want to get all library books");
-    console.log(myLibrary);
     var libraryToGive = [];
     for(let g = 0; g < myLibrary.data.length; g++){
-        console.log(g);
+        //console.log(g);
         const bookEntry = {
             book_id : myLibrary.data[g].book_id,
             name : myLibrary.data[g].name,
@@ -454,16 +342,15 @@ app.get('/books/library', (req, res) => {
         }
         libraryToGive.push(bookEntry);
     }
-    console.log(libraryToGive);
     res.json(libraryToGive);
 });
 
-app.get('/api/message', (req, res) => {
+app.get('/books/message', (req, res) => {
     console.log("Got mesasage request")
     res.json({message:'Hello friend from the server!'});
 });
 
-app.get('/api/testpage', (req, res) => {
+app.get('/books/testpage', (req, res) => {
     console.log("Got mesasage request");
     
     let targetPage = 25;
@@ -507,43 +394,13 @@ app.get('/api/testpage', (req, res) => {
     res.json({message:'Hello friend from the server!'});
 });
 
-//DEE Have previouspage, nextpage, jumpage use this method to determine which content to return
-function retrievePageConent(pageNumber){
-
-    let contentToReturn = '';
-
-    if(pages[pageNumber] === undefined){
-        console.log("Page is empty");
-        contentToReturn = JSON.stringify("");
-        return contentToReturn;
-    }
-    else if(pages[pageNumber].type == 'image'){
-        console.log("Have to return an image name " + pages[pageNumber].content.toString());
-        //res.end(pages[pageNumber].content, 'binary');
-        contentToReturn = JSON.stringify("");
-        return contentToReturn;
-    }else{
-        let response = pages[pageNumber].content;
-
-        if(response === undefined){
-            console.log("Page is missing");
-            res.send(JSON.stringify(""));
-        }else{
-            libraryToPass[currentBook].last_page = pageNumber;
-            res.send(JSON.stringify(response));
-        }
-    }
-}
-
-var currChapter = 0;
-var lastPage = 0;
 /*
 * Responsibilities:
 * Verify the new page has any content, if not return an empty string
 * Retrieve the next page, 
 * After retrieving new page, save the index to Library object's last_page variable
 */
-app.get('/api/nextpage', (req, res) => {
+app.get('/books/nextpage', (req, res) => {
     res.setHeader("Content-Type", "text/html");
     console.log("Next page selected");
     let currChapterIndex = currentBookInfo.lastChapterIndex;
@@ -577,7 +434,6 @@ app.get('/api/nextpage', (req, res) => {
     console.log("The current page in the chapter is " + newPage);
     console.log("The length of the current chapter is " + currentBookInfo.listOfChapters[currChapterIndex].chapter_pages.length)
     
-    
     //Eventually have to locate the last page in the chapter pages, will have to redo this logic
     if(currentBookInfo.listOfChapters[currChapterIndex].chapter_pages !== 'undefined' 
         || currentBookInfo.listOfChapters[currChapterIndex].chapter_pages !== null){
@@ -593,33 +449,9 @@ app.get('/api/nextpage', (req, res) => {
     }else{
         res.send(JSON.stringify(""));
     }
-    
-    /*
-    res.setHeader("Content-Type", "text/html");
-    let newPage = currentBookInfo.lastPage;
-    console.log(newPage);
-    if(newPage >= currentBookInfo.listOfChapters.length - 1){
-        newPage = currentBookInfo.listOfChapters.length - 1;
-    }else{
-        newPage = newPage + 1;
-        console.log("This is the current page " + newPage);
-    }
-    
-    //Eventually have to locate the last page in the chapter pages, will have to redo this logic
-    if(currentBookInfo.listOfChapters[newPage].chapter_pages !== 'undefined' 
-        || currentBookInfo.listOfChapters[newPage].chapter_pages !== null){
-        let response = currentBookInfo.listOfChapters[newPage].chapter_pages[0];
-        currentBookInfo.lastPage = newPage;
-        myLibrary.data[currentBookInfo.book_id].last_page = newPage;
-        //DEE Should send this out as an alert or listener event
-        write_to_json_file("testSave.json", myLibrary);
-        res.send(JSON.stringify(response));
-    }else{
-        res.send(JSON.stringify(""));
-    }*/
 })
 
-app.get('/api/previouspage', (req, res) => {
+app.get('/books/previouspage', (req, res) => {
     
     res.setHeader("Content-Type", "text/html");
     console.log("Next page selected");
@@ -670,55 +502,36 @@ app.get('/api/previouspage', (req, res) => {
     }else{
         res.send(JSON.stringify(""));
     }
-
-    /*console.log("Previous page request");
-    
-    let newPage = currentBookInfo.lastPage;
-    console.log(newPage);
-    if(newPage < 1){
-        newPage = 0;
-    }else{
-        newPage = newPage - 1;
-    }
-    res.setHeader("Content-Type", "text/html");
-
-    if(currentBookInfo.listOfChapters[newPage].chapter_pages[0] != 'undefined'){
-        let response = currentBookInfo.listOfChapters[newPage].chapter_pages[0];
-        //DEE Simplify down and only store in one page
-        currentBookInfo.lastPage = newPage;
-        myLibrary.data[currentBookInfo.book_id].last_page = newPage;
-        //DEE Should send this out as an alert or listener event
-        write_to_json_file("testSave.json", myLibrary);
-        res.send(JSON.stringify(response));
-    }else{
-        res.send(JSON.stringify(""));
-    }*/
 })
 
 //DEEM Edge cases to consider, will have to consider white space, invalid numbers, and string values with quotes
-app.post('/api/jumppage', (req, res)=>{
+app.post('/books/jumppage', (req, res)=>{
+
     //let response = pages[currentPage].toString();
     console.log(req.body);
     const targetPage = Number(req.body.number);
-    console.log(`Received the number of ${targetPage}`);
+    console.log(`In jump page, trying to find the number of ${targetPage}`);
 
     let chapterLoc = 0;
     let pageLoc = 0;
     let currPage = 0;
+    let foundPage = false;
+    console.log("The length of the book is " + currentBookInfo.listOfChapters.length);
     for(let currChap = 0; currChap < currentBookInfo.listOfChapters.length; currChap++){
         console.log("Current chapter is " + currChap);
         for(let currPageIndex = 0; currPageIndex < currentBookInfo.listOfChapters[currChap].chapter_pages.length; currPageIndex++){
-            console.log("The current page in the chapter is " + currPageIndex);
+            console.log("The current page in the chapter is " + currPageIndex + " with its overall location being " + currPage);
             if(currPage === targetPage){
                 console.log("Found the page in chapter " + currChap + " and it's page of " + currPageIndex);
                 chapterLoc = currChap;
                 pageLoc = currPageIndex;
+                foundPage = true;
                 break;
-            }else{
-                currPage++;
             }
+            currPage++;
         }
-        if(currPage === targetPage){
+        if(foundPage === true){
+            console.log("Found page");
             break;
         }
     }
@@ -732,58 +545,60 @@ app.post('/api/jumppage', (req, res)=>{
         currentBookInfo.lastChapterIndex = chapterLoc;
         myLibrary.data[currentBookInfo.book_id].last_page = pageLoc;
         myLibrary.data[currentBookInfo.book_id].last_chapter = chapterLoc;
+        console.log("Finishing out and saving");
         //DEE Should send this out as an alert or listener event
         write_to_json_file("books/bookSave.json", myLibrary);
         res.send(JSON.stringify(response));
     }else{
         res.send(JSON.stringify(""));
     }
-
-    res.json({message:'Hello friend from the server!'});
-
-    /*
-    let targetPage = currentBookInfo.lastPage;
-
-    console.log(`Current page is ` + targetPage);
-
-    //DEE Might need to get rid of -1 
-    if(targetPage < 1 || targetPage > currentBookInfo.listOfChapters.length -1){
-        targetPage = 0;
-    }
-    
-    //DEE Might need to get rid of -1 
-    if(givenNumber > -1 && givenNumber < currentBookInfo.listOfChapters.length -1){
-        targetPage = givenNumber;
-        console.log("Our number falls within range " + givenNumber);
-    }
-
-    if(currentBookInfo.listOfChapters[targetPage].chapter_pages !== 'undefined' 
-        || currentBookInfo.listOfChapters[targetPage].chapter_pages !== null){
-        let response = currentBookInfo.listOfChapters[targetPage].chapter_pages[0];
-        //DEE Simplify down and only store in one page
-        currentBookInfo.lastPage = targetPage;
-        myLibrary.data[currentBookInfo.book_id].last_page = targetPage;
-        //DEE Should send this out as an alert or listener event
-        write_to_json_file("testSave.json", myLibrary);
-        res.send(JSON.stringify(response));
-    }else{
-        res.send(JSON.stringify(""));
-    }*/
 });
 
-app.get('/api/image', (req, res) => {
-    const imagePath = path.join(__dirname, 'images', 'your-image.jpg'); // Replace 'your-image.jpg' with the actual image file name
+app.post('/books/cover', (req, res) => {
+    console.log("Trying to recover cover with value of " + req.body.number);
+    const givenNumber = Number(req.body.number);
+    let imagePath = "";
+
+    if(givenNumber < myLibrary.data.length){
+        console.log("Here is the image we recovered " + myLibrary.data[givenNumber].cover_path);
+        imagePath = path.join(__dirname, myLibrary.data[givenNumber].cover_path);
+    }
     const image = fs.readFileSync(imagePath);
-  
-    res.writeHead(200, {
-      'Content-Type': 'image/jpeg' // Adjust the Content-Type based on the image type
-    });
-    res.end(image, 'binary');
-  });
+    res.sendFile(imagePath);
+});
 
-//locatePage(25);
+app.get('/books/tableofcontents', (req, res) => {
+    console.log("Table of contents hit, trying to return " + currentBookInfo.listOfChapters[0].chapter_name);
+    let chapters = [];
+
+    //Should be returning name and the index of the chapter so we can just return the start of the page
+    for(let h = 0; h < currentBookInfo.listOfChapters.length; h++){
+        let chapIndexes = {
+            chapter_index: h,
+            chapter_name: currentBookInfo.listOfChapters[h].chapter_name,
+        }
+        chapters.push(chapIndexes)
+    }
+    console.log("These are the table of contents we're returning " + chapters);
+    res.send(JSON.stringify(chapters));
+});
+
+app.post('/books/loadchapter', (req, res)=> {
+    console.log("Load chapter request hit");
+    const targetChapter = Number(req.body.number);
+    let response = "";
+    if(targetChapter > currentBookInfo.listOfChapters.length - 1){
+        response = currentBookInfo.listOfChapters[currentBookInfo.lastChapterIndex].chapter_pages[currentBookInfo.lastPage];
+        res.send(JSON.stringify(response));
+    }else{
+        response = currentBookInfo.listOfChapters[targetChapter].chapter_pages[0];
+        currentBookInfo.lastPage = 0;
+        currentBookInfo.lastChapterIndex = targetChapter;
+        myLibrary.data[currentBookInfo.book_id].last_page = 0;
+        myLibrary.data[currentBookInfo.book_id].last_chapter = targetChapter;
+        write_to_json_file("books/bookSave.json", myLibrary);
+        res.send(JSON.stringify(response));
+    }
+});
+
 app.listen(3088);
-
-/*app.get('/', function(request, response){
-    response.sendFile('absolutePathToYour/htmlPage.html');
-});*/
